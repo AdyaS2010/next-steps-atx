@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" preserveAspectRatio="none" width="1600" height="420" role="img" aria-label="Illustration of the Pennybacker Bridge over Lake Austin">
+  <title>Pennybacker Bridge, Austin, Texas</title>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5eead4" stop-opacity="0"/>
+      <stop offset="100%" stop-color="#5eead4" stop-opacity="0.22"/>
+    </linearGradient>
+    <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f766e" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#0f766e" stop-opacity="0.10"/>
+    </linearGradient>
+    <linearGradient id="farHill" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f766e" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#0f766e" stop-opacity="0.30"/>
+    </linearGradient>
+    <linearGradient id="cliff" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#115e56" stop-opacity="0.88"/>
+      <stop offset="45%" stop-color="#115e56" stop-opacity="1"/>
+      <stop offset="100%" stop-color="#0b3f3a" stop-opacity="1"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="420" fill="url(#sky)"/>
+
+  <!-- Distant Hill Country ridgeline -->
+  <path d="M0 250 L104 232 L204 244 L310 218 L410 238 L512 214 L616 234 L720 210 L826 232 L930 208 L1036 232 L1140 210 L1248 234 L1352 214 L1456 236 L1600 220 L1600 302 L0 302 Z" fill="url(#farHill)"/>
+
+  <!-- Lake Austin -->
+  <rect x="0" y="298" width="1600" height="122" fill="url(#water)"/>
+  <g stroke="#ffffff" stroke-opacity="0.32" stroke-width="2" stroke-linecap="round">
+    <line x1="140" y1="326" x2="300" y2="326"/>
+    <line x1="380" y1="352" x2="576" y2="352"/>
+    <line x1="690" y1="330" x2="866" y2="330"/>
+    <line x1="946" y1="368" x2="1132" y2="368"/>
+    <line x1="1196" y1="338" x2="1366" y2="338"/>
+    <line x1="256" y1="386" x2="434" y2="386"/>
+    <line x1="1000" y1="400" x2="1178" y2="400"/>
+  </g>
+
+  <!-- Pennybacker Bridge: steel deck-arch spanning the lake -->
+  <g stroke="#b45309" stroke-opacity="0.92" fill="none" stroke-linecap="round">
+    <!-- Main arch rib -->
+    <path d="M200 300 Q800 30 1400 300" stroke-width="11"/>
+    <!-- Second rib, offset for depth -->
+    <path d="M200 300 Q800 46 1400 300" stroke-width="6" stroke-opacity="0.5"/>
+    <!-- Spandrel columns from deck down to the arch -->
+    <g stroke-width="6">
+      <line x1="320" y1="163" x2="320" y2="251"/>
+      <line x1="440" y1="163" x2="440" y2="214"/>
+      <line x1="560" y1="163" x2="560" y2="187"/>
+      <line x1="680" y1="163" x2="680" y2="171"/>
+      <line x1="920" y1="163" x2="920" y2="171"/>
+      <line x1="1040" y1="163" x2="1040" y2="187"/>
+      <line x1="1160" y1="163" x2="1160" y2="214"/>
+      <line x1="1280" y1="163" x2="1280" y2="251"/>
+    </g>
+  </g>
+
+  <!-- Roadway deck -->
+  <rect x="0" y="145" width="1600" height="18" fill="#b45309" fill-opacity="0.92"/>
+  <rect x="0" y="141" width="1600" height="5" fill="#78350f" fill-opacity="0.5"/>
+  <line x1="0" y1="132" x2="1600" y2="132" stroke="#b45309" stroke-opacity="0.6" stroke-width="3"/>
+
+  <!-- Limestone cliffs framing the span -->
+  <path d="M0 196 L64 158 L124 182 L186 150 L238 176 L282 158 L322 190 L342 238 L328 340 L0 340 Z" fill="url(#cliff)"/>
+  <path d="M1600 196 L1536 158 L1476 182 L1414 150 L1362 176 L1318 158 L1278 190 L1258 238 L1272 340 L1600 340 Z" fill="url(#cliff)"/>
+
+  <!-- Hill Country cedar and live oak -->
+  <g fill="#0b3f3a" fill-opacity="0.72">
+    <path d="M70 158 l14 -30 l14 30 z"/>
+    <path d="M136 180 l12 -26 l12 26 z"/>
+    <path d="M206 152 l13 -28 l13 28 z"/>
+    <path d="M274 158 l12 -25 l12 25 z"/>
+    <path d="M1530 158 l-14 -30 l-14 30 z"/>
+    <path d="M1464 180 l-12 -26 l-12 26 z"/>
+    <path d="M1394 152 l-13 -28 l-13 28 z"/>
+    <path d="M1326 158 l-12 -25 l-12 25 z"/>
+  </g>
+</svg>

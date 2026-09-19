@@ -1,0 +1,10 @@
+.assist { margin-top: 1rem; border-top: 1px solid var(--cp-border); padding-top: .5rem; font-size: .875rem; }
+.assist p { line-height: 1.6; margin: .6rem 0; }
+.row { display: flex; justify-content: space-between; align-items: center; gap: .5rem; }
+.open { min-height: 44px; border: 0; background: var(--cp-surface); color: var(--cp-link); border-radius: .625rem; padding: .5rem; text-align: left; cursor: pointer; }
+.primary { min-height: 44px; padding: .65rem 1rem; border: 0; border-radius: .625rem; background: var(--cp-accent); color: var(--cp-accent-fg); font: inherit; font-weight: 600; cursor: pointer; }
+.primary:disabled { opacity: .55; cursor: not-allowed; }
+.preview { white-space: pre-wrap; overflow-wrap: anywhere; padding: .75rem; border: 1px solid var(--cp-border); background: var(--cp-surface-soft); color: var(--cp-text); font: inherit; max-height: 10rem; overflow: auto; }
+.consent { display: flex; align-items: center; gap: .7rem; min-height: 44px; margin: .5rem 0; cursor: pointer; }
+.consent input { width: 22px; height: 22px; flex-shrink: 0; accent-color: var(--cp-accent); }
+.suggestions { padding: .75rem; border: 1px solid var(--cp-border); border-radius: .625rem; margin-top: .75rem; background: var(--cp-surface); }

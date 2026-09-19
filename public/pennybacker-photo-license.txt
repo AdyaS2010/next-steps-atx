@@ -1,0 +1,19 @@
+Pennybacker Bridge landing-page photograph
+
+Title: Pennybacker Bridge September 2018
+Creator: Haythemhammour
+Date photographed: September 1, 2018
+Source: https://commons.wikimedia.org/wiki/File:Pennybacker_Bridge_September_2018.jpg
+Original: https://upload.wikimedia.org/wikipedia/commons/1/16/Pennybacker_Bridge_September_2018.jpg
+License: CC0 1.0 Universal (Public Domain Dedication)
+License URL: https://creativecommons.org/publicdomain/zero/1.0/
+Verified: September 18, 2026, Wikimedia Commons imageinfo/extmetadata.
+
+Local derivatives:
+- pennybacker-1920.jpg: resized from 5760x3840 to 1920x1280, JPEG quality 82.
+- pennybacker-960.jpg: resized from 5760x3840 to 960x640, JPEG quality 82.
+Metadata removed by re-encoding. CSS crops and darkens the photograph for
+responsive display; the scene itself is not altered.
+
+The photographer has not endorsed this application. No City of Austin logo or
+government website photograph has been copied. This application is independent.
