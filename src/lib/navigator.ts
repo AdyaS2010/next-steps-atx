@@ -105,12 +105,12 @@ const categoryTerms: Record<BenefitCategory, string[]> = {
   ],
   housing: [
     'rent', 'house', 'home', 'housing', 'eviction', 'homeless', 'shelter',
-    'mortgage', 'apartment',
+    'mortgage', 'apartment', 'foster care', 'aging out', 'hoa', 'homeowners association', 'deed restrictions',
     'renta', 'casa', 'vivienda', 'desalojo', 'sin hogar', 'refugio', 'hipoteca',
   ],
   utilities: [
     'electric', 'electricity', 'power', 'water', 'gas', 'utility', 'utilities',
-    'bill', 'bills', 'internet', 'phone', 'wifi', 'lights',
+    'bill', 'bills', 'internet', 'phone', 'wifi', 'lights', 'rebate', 'rebates', 'energy efficiency', 'solar',
     'luz', 'electricidad', 'agua', 'factura', 'facturas', 'servicios', 'telefono', 'recibo',
   ],
   family: [
@@ -120,12 +120,12 @@ const categoryTerms: Record<BenefitCategory, string[]> = {
   ],
   financial: [
     'tax', 'taxes', 'money', 'debt', 'credit', 'savings', 'refund', 'eitc',
-    'budget', 'loan', 'property tax',
+    'budget', 'loan', 'property tax', 'appraisal', 'credit report', 'credit score', 'identity theft', 'file my taxes', 'small business', 'start a business', 'debt', 'credit card',
     'impuesto', 'impuestos', 'dinero', 'deuda', 'credito', 'ahorro', 'reembolso', 'presupuesto',
   ],
   income: [
     'job', 'unemployed', 'unemployment', 'cash', 'income', 'work', 'benefits',
-    'laid off', 'tanf', 'welfare',
+    'laid off', 'tanf', 'welfare', 'resume', 'career', 'new job', 'better job', 'job training',
     'trabajo', 'empleo', 'desempleo', 'ingreso', 'ingresos', 'efectivo', 'ayuda economica',
   ],
   special: [
@@ -134,8 +134,8 @@ const categoryTerms: Record<BenefitCategory, string[]> = {
     'veterano', 'mayor', 'discapacidad', 'inmigrante', 'refugiado',
   ],
   transportation: ['transportation', 'transport', 'bus', 'bus pass', 'bus fare', 'ride', 'transit', 'capmetro', 'transportation help', 'transporte', 'autobus', 'camion', 'pasaje', 'aventon'],
-  education: ['education', 'school', 'college', 'university', 'student', 'ged', 'esl', 'learn english', 'tuition', 'educacion', 'escuela', 'universidad', 'estudiante', 'aprender ingles', 'matricula'],
-  safety: ['domestic violence', 'violence', 'abuse', 'unsafe', 'safety', 'violencia', 'abuso', 'maltrato', 'peligro', 'seguridad'],
+  education: ['education', 'school', 'college', 'university', 'student', 'ged', 'esl', 'learn english', 'tuition', 'fafsa', 'certification', 'certificate', 'course', 'courses', 'training', 'educacion', 'curso', 'cursos', 'certificacion', 'capacitacion', 'escuela', 'universidad', 'estudiante', 'aprender ingles', 'matricula'],
+  safety: ['domestic violence', 'expunction', 'expunge', 'nondisclosure', 'criminal record', 'my record', 'antecedentes', 'violence', 'abuse', 'unsafe', 'safety', 'lawyer', 'attorney', 'legal aid', 'legal help', 'court date', 'court papers', 'protective order', 'violencia', 'abuso', 'maltrato', 'peligro', 'seguridad', 'abogado', 'abogada', 'ayuda legal', 'corte', 'orden de proteccion'],
   pets: ['pet', 'pets', 'dog', 'dogs', 'cat', 'cats', 'puppy', 'kitten', 'vet', 'veterinary', 'veterinarian', 'spay', 'neuter', 'emancipet', 'pet food', 'mascota', 'mascotas', 'perro', 'perra', 'gato', 'gata', 'cachorro', 'gatito', 'veterinario', 'veterinaria', 'esterilizacion'],
 }
 

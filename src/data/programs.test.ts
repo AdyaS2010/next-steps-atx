@@ -22,6 +22,11 @@ const officialHosts = new Set([
   'www.austinisd.org', 'www.austinecho.org', 'sunrisenavigationcenter.org',
   'library.austintexas.gov', 'integralcare.org',
   'emancipet.org', 'www.austinpetsalive.org', 'austinhumanesociety.org',
+  'www.safeaustin.org', 'www.vlsoct.org', 'texaslawhelp.org', 'lawlibrary.traviscountytx.gov',
+  'statutes.capitol.texas.gov', 'www.austindrc.org', 'savings.austinenergy.com', 'consumer.ftc.gov',
+  'www.identitytheft.gov', 'www.irs.gov', 'studentaid.gov', 'www.capitalidea.org',
+  'skillpointalliance.org', 'www.goodwillcentraltexas.org', 'www.workintexas.com',
+  'www.austintexas.gov', 'www.dps.texas.gov', 'www.dfps.texas.gov',
 ])
 
 function expectLocalized(value: Localized | undefined) {
@@ -46,7 +51,7 @@ function byId(id: string) {
 describe('researched service catalog', () => {
   it('expands the catalog without breaking existing saved program IDs', () => {
     expect(programs.length).toBeGreaterThanOrEqual(36)
-    expect(programs.length).toBe(47)
+    expect(programs.length).toBe(68)
     expect(new Set(programs.map((program) => program.id)).size).toBe(programs.length)
     originalIds.forEach((id) => expect(byId(id).id).toBe(id))
   })

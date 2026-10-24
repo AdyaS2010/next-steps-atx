@@ -233,7 +233,7 @@ const questionsByNeed: Record<BenefitCategory, HouseholdFlag[]> = {
   special: ['hasSenior60Plus', 'hasDisability', 'isVeteranHousehold', 'isCaregiver', 'isImmigrantOrNewcomer'],
   transportation: ['needsTransportation', 'hasDisability', 'hasSenior60Plus', 'isStudent'],
   education: ['isStudent', 'isWorkingOrTraining', 'hasChildrenUnder18'],
-  safety: ['isHomeless', 'hasChildrenUnder18'],
+  safety: ['isRenter', 'isHomeless', 'hasChildrenUnder18'],
   pets: [],
 }
 
