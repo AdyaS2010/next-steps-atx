@@ -2,6 +2,8 @@ import { useMemo, useState, useSyncExternalStore } from 'react'
 import { programs } from '../data/programs'
 import type { Language, Localized } from '../types'
 import { localize } from './format'
+import { emptyHousehold } from './eligibility'
+import { phaseFor, phases, phaseCopy, type Phase } from './plan'
 
 export const STEPS_KEY = 'austin-benefits:steps:v1'
 const CHANGE_EVENT = 'austin-benefits:steps-change'
@@ -69,9 +71,19 @@ function snapshot() {
   }
 }
 
+/** Saved entries grouped by plan phase, keeping save order within each phase. */
+export function groupSteps(entries: SavedSteps[]): { phase: Phase; entries: SavedSteps[] }[] {
+  const neutral = emptyHousehold()
+  const phaseOf = (entry: SavedSteps) => {
+    const program = programs.find(item => item.id === entry.programId)
+    return program ? phaseFor(program, neutral).phase : 'month'
+  }
+  return phases.map(phase => ({ phase, entries: entries.filter(entry => phaseOf(entry) === phase) })).filter(group => group.entries.length)
+}
+
 export function planText(entries: SavedSteps[], language: Language): string {
-  const heading = language === 'en' ? 'My next steps - Austin Benefits Navigator' : 'Mis próximos pasos - Austin Benefits Navigator'
-  const blocks = entries.map(entry => {
+  const heading = language === 'en' ? 'My next steps - Next Steps ATX (Austin Benefits Navigator)' : 'Mis próximos pasos - Next Steps ATX (Navegador de beneficios de Austin)'
+  const blocks = groupSteps(entries).flatMap(group => [`== ${localize(phaseCopy[group.phase].title, language)} ==`, ...group.entries.map(entry => {
     const program = programs.find(program => program.id === entry.programId)
     if (!program) throw new Error('A selected program is no longer in the catalog')
     const steps = (program.steps ?? []).map(step => `${entry.completed.includes(step.id) ? '[x]' : '[ ]'} ${localize(step.title, language)}\n${localize(step.detail, language)}`)
@@ -81,7 +93,7 @@ export function planText(entries: SavedSteps[], language: Language): string {
       ...steps, program.applyPhone ?? '', program.applyOnlineUrl ?? '',
       ...(program.sources ?? []).map(source => `${source.label}: ${source.url} (${source.checkedOn})`),
     ].filter(Boolean).join('\n')
-  })
+  })])
   const note = language === 'en'
     ? 'This checklist does not submit an application. Confirm current requirements and availability with each provider. No household answers are included.'
     : 'Esta lista no envía una solicitud. Confirme los requisitos y la disponibilidad con cada proveedor. No incluye respuestas sobre su hogar.'
@@ -121,6 +133,10 @@ export function useSteps() {
     error: state.error ?? writeError,
     saveProgram: (programId: string) => change(entries => entries.some(entry => entry.programId === programId)
       ? entries : [...entries, { programId, completed: [] }]),
+    savePrograms: (programIds: string[]) => change(entries => [
+      ...entries,
+      ...[...new Set(programIds)].filter(id => !entries.some(entry => entry.programId === id)).map(programId => ({ programId, completed: [] })),
+    ]),
     removeProgram: (programId: string) => change(entries => entries.filter(entry => entry.programId !== programId)),
     toggleStep: (programId: string, stepId: string) => change(entries => {
       if (!entries.some(entry => entry.programId === programId)) throw new Error('Save the program before changing its steps')
