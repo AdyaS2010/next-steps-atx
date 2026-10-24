@@ -39,4 +39,4 @@ const server = createServer(async (request, response) => {
 })
 server.requestTimeout = 10000
 server.headersTimeout = 10000
-server.listen(port, '127.0.0.1', () => console.log(`Austin Benefits Navigator: http://127.0.0.1:${port}`))
+server.listen(port, '127.0.0.1', () => console.log(`Next Steps ATX: http://127.0.0.1:${port}`))

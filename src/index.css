@@ -1,5 +1,7 @@
 :root {
   color-scheme: light;
+  --cp-body: "Public Sans Variable", "Segoe UI", system-ui, sans-serif;
+  --cp-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
   --cp-bg: #f8f6f1;
   --cp-bg-elevated: #fdfcf8;
   --cp-surface: #ffffff;
@@ -60,7 +62,7 @@ html[data-theme="dark"] {
 }
 * { box-sizing: border-box; }
 html { background: var(--cp-bg); }
-body { margin: 0; min-width: 0; min-height: 100vh; background: var(--cp-bg); color: var(--cp-text); font-family: "Segoe UI", SegoeUI, system-ui, sans-serif; font-size: 16px; -webkit-font-smoothing: antialiased; overflow-wrap: break-word; }
+body { margin: 0; min-width: 0; min-height: 100vh; background: var(--cp-bg); color: var(--cp-text); font-family: var(--cp-body); font-size: 16px; -webkit-font-smoothing: antialiased; overflow-wrap: break-word; }
 button, a, input, select, textarea { font: inherit; -webkit-tap-highlight-color: transparent; }
 button { color: inherit; }
 a { color: var(--cp-link); }

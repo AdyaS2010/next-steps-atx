@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ArrowRight, CheckSquare, HandHeart, MapPin, Menu, Moon, Phone, Search, ShieldCheck, Sun } from 'lucide-react'
+import { ArrowRight, Briefcase, CheckSquare, HandHeart, MapPin, Menu, Moon, Phone, Search, ShieldCheck, Sun, Wallet } from 'lucide-react'
 import './App.css'
 import { programs } from './data/programs'
 import { places } from './data/places'
@@ -17,11 +17,18 @@ import VoiceInput from './components/VoiceInput'
 import UrgentHelp from './components/UrgentHelp'
 import { AiAssist } from './components/AiAssist'
 import { CommonTerms } from './components/CommonTerms'
+import { PathwayFacts, PathwayGrid, PathwayView, QuickExit } from './components/Pathways'
+import { ActionPlan } from './components/ActionPlan'
+import { MoneyCheck } from './components/MoneyCheck'
+import { CareerBuilder } from './components/CareerBuilder'
+import { buildActionPlan } from './lib/plan'
+import { getAiStatus } from './lib/ai'
+import { pathways, type Pathway } from './data/pathways'
 import type { BenefitCategory, Household, Language } from './types'
 
-type View = 'find' | 'confirm' | 'guided' | 'results' | 'nearby' | 'steps' | 'more' | 'directory' | 'about' | 'urgent'
+type View = 'find' | 'confirm' | 'guided' | 'results' | 'nearby' | 'steps' | 'more' | 'directory' | 'about' | 'urgent' | 'pathway' | 'money' | 'career'
 type Route = { view: View; programId: string | null }
-const views: View[] = ['find', 'confirm', 'guided', 'results', 'nearby', 'steps', 'more', 'directory', 'about', 'urgent']
+const views: View[] = ['find', 'confirm', 'guided', 'results', 'nearby', 'steps', 'more', 'directory', 'about', 'urgent', 'pathway', 'money', 'career']
 
 function readRoute(): Route {
   const [view, marker, id] = window.location.hash.slice(1).split('/')
@@ -44,11 +51,17 @@ export default function App() {
   const [directoryLimit, setDirectoryLimit] = useState(10)
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState<BenefitCategory | 'all'>('all')
+  const [pathwayId, setPathwayId] = useState<string | null>(null)
+  const [resultsTab, setResultsTab] = useState<'plan' | 'list'>('plan')
+  const [confirmReset, setConfirmReset] = useState(false)
   const main = useRef<HTMLElement>(null)
   const [opener, setOpener] = useState<HTMLElement | null>(null)
   const steps = useSteps()
   const t = createTranslator(language)
 
+  // The optional AI entry point appears only when a provider is actually connected.
+  const [aiAvailable, setAiAvailable] = useState(false)
+  useEffect(() => { let live = true; void getAiStatus().then(status => { if (live) setAiAvailable(status.available) }); return () => { live = false } }, [])
   useEffect(() => { document.documentElement.lang = language }, [language])
   useEffect(() => { document.documentElement.dataset.theme = theme }, [theme])
   useEffect(() => {
@@ -76,8 +89,10 @@ export default function App() {
     else go(route.view, true)
   }
   const reset = () => {
+    setConfirmReset(false)
     setText(''); setHousehold(emptyHousehold()); setSignal(null); setConfirmed(false)
     setSearch(''); setCategory('all'); setResultLimit(3); setDirectoryLimit(10)
+    setPathwayId(null); setResultsTab('plan')
     setFlowRevision(value => value + 1); go('find', true)
   }
   const run = (needs?: BenefitCategory[]) => {
@@ -85,27 +100,42 @@ export default function App() {
     const interpreted = interpretSituation(text, language)
     if (needs && !interpreted.emergency) interpreted.categories = needs
     setSignal(interpreted); setHousehold(householdFromSignal(interpreted)); setConfirmed(false)
-    setResultLimit(3); setFlowRevision(value => value + 1)
+    setResultLimit(3); setFlowRevision(value => value + 1); setPathwayId(null); setResultsTab('plan')
     setText('')
     go(interpreted.emergency ? 'urgent' : 'confirm')
   }
-  const startGuided = (need?: BenefitCategory) => {
+  const startGuided = (need?: BenefitCategory | BenefitCategory[]) => {
     const fresh = emptyHousehold()
-    if (need) fresh.needs = [need]
-    setText(''); setHousehold(fresh); setSignal(null); setConfirmed(false)
+    if (need) fresh.needs = Array.isArray(need) ? need : [need]
+    setText(''); setHousehold(fresh); setSignal(null); setConfirmed(false); setPathwayId(null); setResultsTab('plan')
     setFlowRevision(value => value + 1); go('guided')
   }
+  const openPathway = (id: string) => { setPathwayId(id); go('pathway') }
+  // Pathway details are suggestions; the confirmation step still asks the person to check them.
+  const startPathway = (pathway: Pathway) => {
+    const fresh = emptyHousehold()
+    fresh.needs = [...pathway.needs]
+    for (const flag of pathway.flags) fresh[flag] = true
+    setSignal({ flags: [...pathway.flags], deniedFlags: [], categories: [...pathway.needs], placeKinds: [], wantsNearby: false, size: null, monthlyIncome: null, zip: null, emergency: null, warnings: [] })
+    setText(''); setHousehold(fresh); setConfirmed(false); setResultLimit(3); setResultsTab('plan')
+    setPathwayId(pathway.id); setFlowRevision(value => value + 1); go('confirm')
+  }
   const recommendations = useMemo(() => confirmed ? rankRecommendations(programs, household) : [], [confirmed, household])
+  const plan = useMemo(() => buildActionPlan(recommendations, household), [recommendations, household])
+  const activePathway = pathways.find(pathway => pathway.id === pathwayId)
+  // A chosen pathway decides; otherwise any explicit safety need shows the quick exit.
+  const showQuickExit = activePathway ? Boolean(activePathway.quickExit) : household.needs.includes('safety')
   const directory = useMemo(() => {
     const query = normalize(search)
     return programs.filter(program => (category === 'all' || program.category === category) &&
       normalize(`${program.name} ${program.agency} ${program.provides[language]} ${program.eligibilitySummary[language]}`).includes(query))
   }, [search, category, language])
   const selected = programs.find(program => program.id === route.programId)
-  const activeNav = ['confirm', 'guided', 'results', 'urgent'].includes(route.view) ? 'find' :
+  const activeNav = ['confirm', 'guided', 'results', 'urgent', 'pathway', 'money'].includes(route.view) ? 'find' :
     ['directory', 'about'].includes(route.view) ? 'more' : route.view
   const nav = [
     { view: 'find' as const, label: 'find' as const, icon: Search },
+    { view: 'career' as const, label: 'career' as const, icon: Briefcase },
     { view: 'nearby' as const, label: 'nearby' as const, icon: MapPin },
     { view: 'steps' as const, label: 'mySteps' as const, icon: CheckSquare },
     { view: 'more' as const, label: 'more' as const, icon: Menu },
@@ -113,10 +143,10 @@ export default function App() {
   return <>
     <div className="app-shell" inert={Boolean(selected)}>
       <a className="skip-link" href="#main" onClick={event => { event.preventDefault(); main.current?.focus() }}>{t('skip')}</a>
-      <div className="civic-strip"><span>{t('independent')}</span><a href="tel:211"><Phone size={13} aria-hidden="true" />2-1-1</a></div>
+      {showQuickExit && route.view !== 'pathway' && <div className="quick-exit-float"><QuickExit language={language} /></div>}
       <header className="site-header">
-        <button className="brand" onClick={() => go('find')} aria-label={t('appName')}>
-          <HandHeart aria-hidden="true" size={26} /><span>{t('appName')}</span>
+        <button className="brand" onClick={() => go('find')} aria-label={`${t('appName')}: ${t('appSubtitle')}`}>
+          <HandHeart aria-hidden="true" size={28} /><span className="brand-text"><span className="brand-name">{t('appName')}</span><span className="brand-sub">{t('appSubtitle')}</span></span>
         </button>
         <div className="header-actions">
           <button className="language-button" lang={language === 'en' ? 'es' : 'en'} onClick={() => setLanguage(value => value === 'en' ? 'es' : 'en')}>{language === 'en' ? 'Español' : 'English'}</button>
@@ -161,6 +191,11 @@ export default function App() {
             </div>
           </section>
           <div className="landing-content">
+            <section className="pathways-section" aria-labelledby="pathways-heading">
+              <div className="section-heading"><div><p className="eyebrow">{t('pathwaysEyebrow')}</p><h2 id="pathways-heading">{t('pathwaysHeading')}</h2></div></div>
+              <p className="section-description">{t('pathwaysIntro')}</p>
+              <PathwayGrid language={language} onOpen={openPathway} limit={8} />
+            </section>
             <section className="needs-section" aria-labelledby="needs-heading">
               <div className="section-heading"><div><p className="eyebrow">{t('chooseNeed')}</p><h2 id="needs-heading">{t('homeBrowse')}</h2></div>
                 <button className="text-button" onClick={() => go('directory')}>{t('directory')}<ArrowRight size={18} aria-hidden="true" /></button></div>
@@ -171,9 +206,8 @@ export default function App() {
             <section className="home-shortcuts" aria-labelledby="shortcuts-heading">
               <h2 id="shortcuts-heading">{t('homeShortcuts')}</h2>
               <div className="shortcut-grid">
-                <button onClick={() => go('nearby')}><MapPin aria-hidden="true" size={25} /><strong>{t('shortcutNearby')}</strong><span>{t('shortcutNearbyDetail')}</span><ArrowRight aria-hidden="true" size={21} /></button>
-                <button onClick={() => go('directory')}><Search aria-hidden="true" size={25} /><strong>{t('shortcutDirectory')}</strong><span>{t('shortcutDirectoryDetail')}</span><ArrowRight aria-hidden="true" size={21} /></button>
-                <button onClick={() => go('steps')}><CheckSquare aria-hidden="true" size={25} /><strong>{t('shortcutPlan')}</strong><span>{t('shortcutPlanDetail')}</span><ArrowRight aria-hidden="true" size={21} /></button>
+                <button onClick={() => go('career')}><Briefcase aria-hidden="true" size={25} /><strong>{t('careerShortcut')}</strong><span>{t('careerShortcutDetail')}</span><ArrowRight aria-hidden="true" size={21} /></button>
+                <button onClick={() => go('money')}><Wallet aria-hidden="true" size={25} /><strong>{t('moneyShortcut')}</strong><span>{t('moneyShortcutDetail')}</span><ArrowRight aria-hidden="true" size={21} /></button>
               </div>
             </section>
             <section className="human-help" aria-labelledby="human-help-heading">
@@ -181,9 +215,9 @@ export default function App() {
               <div><p className="eyebrow">{t('human')}</p><h2 id="human-help-heading">{t('humanIntro')}</h2><p>{t('humanBody')}</p></div>
               <a className="button" href="tel:211"><Phone size={19} aria-hidden="true" />{t('call211')}<ArrowRight size={18} aria-hidden="true" /></a>
             </section>
-            <section className="home-assistance"><h2>{t('aiAlternative')}</h2><p>{t('aiAlternativeIntro')}</p>
+            {aiAvailable && <details className="home-assistance"><summary>{t('aiAlternative')}</summary><p>{t('aiAlternativeIntro')}</p>
               <AiAssist text={text} language={language} onNeeds={run} />
-            </section>
+            </details>}
           </div>
         </section>}
         {(route.view === 'confirm' || route.view === 'guided') && <>
@@ -195,14 +229,24 @@ export default function App() {
         {route.view === 'results' && <section>
           <h1 tabIndex={-1}>{t('results')}</h1><p>{t('resultsNote')}</p>
           <div className="button-row"><button onClick={() => { setFlowRevision(value => value + 1); go('confirm') }}>{t('edit')}</button><button onClick={() => go('nearby')}>{t('nearHeading')}</button></div>
-          <div className="results-list">{recommendations.slice(0, resultLimit).map(result =>
-            <ProgramCard key={result.program.id} program={result.program} language={language} likelihood={result.likelihood}
-              reasons={result.reasons} missing={result.missing} onOpen={openProgram} />)}</div>
+          {activePathway && <PathwayFacts pathway={activePathway} language={language} />}
+          {recommendations.length > 0 && <div className="segmented" role="group" aria-label={t('results')}>
+            <button aria-pressed={resultsTab === 'plan'} onClick={() => setResultsTab('plan')}>{t('planTab')}</button>
+            <button aria-pressed={resultsTab === 'list'} onClick={() => setResultsTab('list')}>{t('listTab')} ({recommendations.length})</button>
+          </div>}
+          {resultsTab === 'plan' && recommendations.length > 0 ? <ActionPlan plan={plan} language={language} steps={steps} onOpen={openProgram} onOpenSteps={() => go('steps')} /> : <>
+            <div className="results-list">{recommendations.slice(0, resultLimit).map(result =>
+              <ProgramCard key={result.program.id} program={result.program} language={language} likelihood={result.likelihood}
+                reasons={result.reasons} missing={result.missing} onOpen={openProgram} />)}</div>
+            {recommendations.length > resultLimit && <button className="show-more" onClick={() => setResultLimit(value => value + 3)}>{t('showMore')} ({recommendations.length - resultLimit})</button>}
+          </>}
           {recommendations.length === 0 && <p className="empty-state">{t('noResults')}</p>}
-          {recommendations.length > resultLimit && <button className="show-more" onClick={() => setResultLimit(value => value + 3)}>{t('showMore')} ({recommendations.length - resultLimit})</button>}
           <button className="text-button" onClick={() => go('directory')}>{t('directory')}</button>
         </section>}
         {route.view === 'nearby' && <NearbyHelp key={flowRevision} language={language} initialZip={confirmed ? household.zip : null} initialKinds={confirmed ? signal?.placeKinds : []} />}
+        {route.view === 'pathway' && <PathwayView pathwayId={pathwayId} language={language} onStart={startPathway} onOpen={openPathway} onTool={tool => go(tool)} />}
+        {route.view === 'career' && <CareerBuilder language={language} onOpen={openProgram} />}
+        {route.view === 'money' && <MoneyCheck language={language} onOpen={openProgram} onPlan={needs => startGuided(needs)} />}
         {route.view === 'steps' && <MySteps language={language} steps={steps} onOpen={openProgram} />}
         {route.view === 'directory' && <section><h1 tabIndex={-1}>{t('directory')}</h1><p>{t('resultsNote')}</p>
           <div className="panel directory-tools"><div className="field"><label htmlFor="program-search">{t('search')}</label><input id="program-search" type="search" value={search} onChange={event => { setSearch(event.target.value); setDirectoryLimit(10) }} /></div>
@@ -211,10 +255,12 @@ export default function App() {
             </select></div></div>
           <div className="results-list">{directory.slice(0, directoryLimit).map(program => <ProgramCard key={program.id} program={program} language={language} onOpen={openProgram} />)}</div>
           {directory.length === 0 && <p>{t('noResults')}</p>}
-          {directory.length > directoryLimit && <button className="show-more" onClick={() => setDirectoryLimit(value => value + 10)}>{t('showMore')} ({directory.length - directoryLimit})</button>}
+          {directory.length > directoryLimit && <button className="show-more" onClick={() => setDirectoryLimit(directory.length)}>{t('showAll')} ({directory.length})</button>}
         </section>}
         {route.view === 'more' && <section className="narrow"><h1 tabIndex={-1}>{t('more')}</h1><div className="menu-list">
           <button onClick={() => go('directory')}>{t('directory')}<ArrowRight aria-hidden="true" size={20} /></button>
+          <button onClick={() => { setPathwayId(null); go('pathway') }}>{t('pathways')}<ArrowRight aria-hidden="true" size={20} /></button>
+          <button onClick={() => go('money')}>{t('moneyCheck')}<ArrowRight aria-hidden="true" size={20} /></button>
           <button onClick={() => go('about')}>{t('about')}<ArrowRight aria-hidden="true" size={20} /></button>
           <a href="tel:211">{t('call211')}</a>
         </div><CommonTerms language={language} /></section>}
@@ -227,7 +273,17 @@ export default function App() {
         {route.view === 'urgent' && (signal?.emergency ? <UrgentHelp language={language} emergency={signal.emergency} onReset={reset} /> :
           <section className="narrow"><h1 tabIndex={-1}>{t('urgent')}</h1><p>{t('urgent911')}</p><a className="button primary" href="tel:911">{t('call')} 9-1-1</a><button onClick={reset}>{t('reset')}</button></section>)}
       </main>
-      <footer className="site-footer"><p>{t('footer')}</p><button onClick={reset}>{t('reset')}</button></footer>
+      <footer className="site-footer"><p className="footer-note">{t('independent')}</p>
+        <button onClick={() => steps.entries.length ? setConfirmReset(true) : reset()} aria-expanded={steps.entries.length ? confirmReset : undefined}>{t('reset')}</button>
+        {confirmReset && <div className="notice reset-confirm" role="region" aria-label={t('reset')}>
+          <p>{t('resetSavedNote').replace('{count}', String(steps.entries.length))}</p>
+          <div className="button-row">
+            <button className="primary" onClick={reset}>{t('resetAnswersOnly')}</button>
+            <button onClick={() => { steps.clear(); reset() }}>{t('resetEverything')}</button>
+            <button className="text-button" onClick={() => setConfirmReset(false)}>{t('cancel')}</button>
+          </div>
+        </div>}
+      </footer>
     </div>
     {selected && <ProgramDetail key={selected.id} language={language} program={selected} onClose={closeProgram} steps={steps} returnFocus={opener} />}
   </>

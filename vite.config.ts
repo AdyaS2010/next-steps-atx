@@ -28,8 +28,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icon.svg', 'pennybacker-photo-license.txt'],
       manifest: {
-        name: 'Austin Benefits Navigator',
-        short_name: 'Benefits ATX',
+        name: 'Next Steps ATX: Austin Benefits Navigator',
+        short_name: 'Next Steps ATX',
         description:
           'Find and apply for benefits you may qualify for in Austin & Travis County.',
         theme_color: '#286343',
@@ -49,7 +49,7 @@ export default defineConfig({
       workbox: {
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//],
-        globPatterns: ['**/*.{js,css,html,ico,png,jpg,svg,json,geojson}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,jpg,svg,json,geojson}', '**/*-latin-wght-normal-*.woff2'],
         // Tile fetches use the browser HTTP cache and the provider's expiry
         // headers. Do not cache opaque blocked/error images in the PWA.
       },

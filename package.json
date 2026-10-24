@@ -1,5 +1,5 @@
 {
-  "name": "austin-benefits-navigator",
+  "name": "next-steps-atx",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,6 +15,8 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/public-sans": "^5.3.0",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.24.0",
     "react": "^19.2.7",
